@@ -52,12 +52,12 @@ public:
      * Returns the number of active orders in the book.
      * Note: Does not include pending stop orders.
      */
-    std::size_t Size() const;
+    [[nodiscard]] std::size_t Size() const noexcept;
 
     /**
      * Returns the number of pending stop orders
      */
-    std::size_t PendingStopCount() const;
+    [[nodiscard]] std::size_t PendingStopCount() const noexcept;
     
     /**
      * Returns aggregated order information by price level.

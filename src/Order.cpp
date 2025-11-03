@@ -14,11 +14,11 @@ Order::Order(OrderType orderType, OrderID orderID, Side side, Price price, Quant
     remainingQuantity_ { quantity }
     { }
 
-bool Order::IsFilled() const { 
+bool Order::IsFilled() const noexcept { 
     return GetRemainingQuantity() == 0;
 }
 
-bool Order::IsStopOrder() const {
+bool Order::IsStopOrder() const noexcept {
     return stopPrice_.has_value();
 }
 

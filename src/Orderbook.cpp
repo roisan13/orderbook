@@ -110,7 +110,11 @@ Trades Orderbook::ModifyOrder(OrderModify order) {
     return AddOrder(order.ToOrderPointer(orderType));
 }
 
-std::size_t Orderbook::Size() const {
+std::size_t Orderbook::PendingStopCount() const noexcept{
+    return pendingStopOrders_.size();
+}
+
+std::size_t Orderbook::Size() const noexcept{
     return orders_.size();
 }
 

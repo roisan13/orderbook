@@ -232,6 +232,96 @@ TEST(OrderbookTest, PostOnlyAddsToBook) {
     EXPECT_EQ(book.Size(), 2);
 }
 
+TEST(OrderbookTest, StopLossSellTriggers) {
+    Orderbook book;
+    
+    auto bid = std::make_shared<Order>(
+        OrderType::GoodTillCancel, 1, Side::Buy, 100, 10
+    );
+    book.AddOrder(bid);
+    
+    // Add stop loss sell at 100
+    auto stopLoss = std::make_shared<Order>(
+        OrderType::GoodTillCancel, 2, Side::Sell, 95, 10, 100  // Trigger at 100
+    );
+    book.AddOrder(stopLoss);
+    
+    EXPECT_EQ(book.PendingStopCount(), 1);
+    
+    // Aggressive sell hits the bid at 100 that should trigger stop
+    auto aggressor = std::make_shared<Order>(
+        OrderType::GoodTillCancel, 3, Side::Sell, 100, 5
+    );
+    auto trades = book.AddOrder(aggressor);
+    
+    // Should have 2 trades:
+    // 1. Aggressor sells 5 @ 100
+    // 2. Stop-loss triggers and sells remaining
+    EXPECT_GE(trades.size(), 1);
+    EXPECT_EQ(book.PendingStopCount(), 0);  // Stop triggered
+}
+
+TEST(OrderbookTest, StopBuyTriggers) {
+    Orderbook book;
+
+    auto ask = std::make_shared<Order>(
+        OrderType::GoodTillCancel, 1, Side::Sell, 100, 10
+    );
+    book.AddOrder(ask);
+    
+    // Add stop-buy at 100 (enters on breakout)
+    auto stopBuy = std::make_shared<Order>(
+        OrderType::GoodTillCancel, 2, Side::Buy, 105, 10, 100  // Trigger at 100
+    );
+    book.AddOrder(stopBuy);
+    
+    EXPECT_EQ(book.PendingStopCount(), 1);
+    
+    // Aggressive buy hits the ask at 100 -> triggers stop order
+    auto aggressor = std::make_shared<Order>(
+        OrderType::GoodTillCancel, 3, Side::Buy, 100, 5
+    );
+    auto trades = book.AddOrder(aggressor);
+    
+    EXPECT_GE(trades.size(), 1);
+    EXPECT_EQ(book.PendingStopCount(), 0);  // Stop triggered
+}
+
+TEST(OrderbookTest, StopOrderNotTriggeredByBookPrice) {
+    Orderbook book;
+    
+    // Add ask at 105
+    auto ask = std::make_shared<Order>(
+        OrderType::GoodTillCancel, 1, Side::Sell, 105, 10
+    );
+    book.AddOrder(ask);
+    
+    // Add stop at 105 (but no trade happened at 105 yet!)
+    auto stop = std::make_shared<Order>(
+        OrderType::GoodTillCancel, 2, Side::Sell, 95, 10, 105
+    );
+    book.AddOrder(stop);
+    
+    // Stop should still be pending (no trade at 105)
+    EXPECT_EQ(book.PendingStopCount(), 1);
+}
+
+TEST(OrderbookTest, CancelPendingStopOrder) {
+    Orderbook book;
+    
+    auto stop = std::make_shared<Order>(
+        OrderType::GoodTillCancel, 1, Side::Sell, 95, 10, 99
+    );
+    book.AddOrder(stop);
+    
+    EXPECT_EQ(book.PendingStopCount(), 1);
+    
+    // Cancel the pending stop
+    book.CancelOrder(1);
+    
+    EXPECT_EQ(book.PendingStopCount(), 0);
+}
+
 // ===============================
 //   Multi-Level Matching Tests
 // ===============================

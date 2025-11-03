@@ -11,18 +11,18 @@ public:
     Order(OrderType orderType, OrderID orderID, Side side, Price price, Quantity quantity, std::optional<Price> stopPrice = std::nullopt);
 
     // Getters
-    OrderID GetOrderID() const { return orderID_; }
-    Side GetSide() const { return side_; }
-    Price GetPrice() const { return price_; }
-    std::optional<Price> GetStopPrice() const { return stopPrice_; }
-    OrderType GetOrderType() const { return orderType_; }
-    Quantity GetInitialQuantity() const { return initialQuantity_; }
-    Quantity GetRemainingQuantity() const { return remainingQuantity_; }
-    Quantity GetFilledQuantity() const { return GetInitialQuantity() - GetRemainingQuantity(); }
+    [[nodisacrd]] OrderID GetOrderID() const noexcept { return orderID_; }
+    [[nodiscard]] Side GetSide() const noexcept { return side_; }
+    [[nodiscard]] Price GetPrice() const noexcept { return price_; }
+    [[nodiscard]] std::optional<Price> GetStopPrice() const noexcept { return stopPrice_; }
+    [[nodiscard]] OrderType GetOrderType() const noexcept { return orderType_; }
+    [[nodiscard]] Quantity GetInitialQuantity() const noexcept { return initialQuantity_; }
+    [[nodiscard]] Quantity GetRemainingQuantity() const noexcept { return remainingQuantity_; }
+    [[nodiscard]] Quantity GetFilledQuantity() const noexcept { return GetInitialQuantity() - GetRemainingQuantity(); }
 
 
-    bool IsFilled() const;
-    bool IsStopOrder() const;
+    [[nodiscard]] bool IsFilled() const noexcept;
+    [[nodiscard]] bool IsStopOrder() const noexcept;
 
     void Fill(Quantity quantity);
     
