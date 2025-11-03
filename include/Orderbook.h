@@ -53,6 +53,11 @@ public:
      * Note: Does not include pending stop orders.
      */
     std::size_t Size() const;
+
+    /**
+     * Returns the number of pending stop orders
+     */
+    std::size_t PendingStopCount() const;
     
     /**
      * Returns aggregated order information by price level.
@@ -79,7 +84,7 @@ private:
     bool CanMatch(Side side, Price price) const;
     bool CanFullyMatch(Side side, Price price, Quantity quantity) const;
     
-    void CheckAndTriggerStopOrders(Price tradePrice);
+    Trades CheckAndTriggerStopOrders(Price tradePrice);
     void MatchAtPriceLevel(OrderPointer& aggressive, OrderPointers& restingOrders, 
                           Trades& trades);
     Trades MatchAggressiveOrder(OrderPointer& order);

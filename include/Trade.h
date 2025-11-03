@@ -12,7 +12,7 @@ struct TradeInfo {
 };
 
 /**
- * Representa a trade between a bid and an ask
+ * Represents a trade between a bid and an ask
  * Both sides trade at the same price (maker's price)
  */
 

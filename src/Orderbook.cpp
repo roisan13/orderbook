@@ -40,7 +40,8 @@ Trades Orderbook::AddOrder(OrderPointer order) {
     // Check for triggered stops
     if (!trades.empty()) {
         auto tradePrice = trades.back().GetAskTrade().price;
-        CheckAndTriggerStopOrders(tradePrice);
+        auto stopTrades = CheckAndTriggerStopOrders(tradePrice);
+        trades.insert(trades.end(), stopTrades.begin(), stopTrades.end());
     }
 
     // Handle FillAndKill
@@ -188,7 +189,8 @@ bool Orderbook::CanFullyMatch(Side side, Price price, Quantity quantity) const {
     return false;  // FIX: Added missing return
 }
 
-void Orderbook::CheckAndTriggerStopOrders(Price tradePrice) {
+Trades Orderbook::CheckAndTriggerStopOrders(Price tradePrice) {
+    Trades allTrades;
     std::vector<OrderPointer> triggeredOrders;
 
     std::erase_if(pendingStopOrders_, [&](OrderPointer order) {
@@ -204,8 +206,17 @@ void Orderbook::CheckAndTriggerStopOrders(Price tradePrice) {
     });
 
     for (auto& triggered : triggeredOrders) {
-        MatchAggressiveOrder(triggered);
+        auto stopTrades = MatchAggressiveOrder(triggered);
+        allTrades.insert(allTrades.end(), stopTrades.begin(), stopTrades.end());
+
+        if (!stopTrades.empty()) {
+            auto lastPrice = stopTrades.back().GetAskTrade().price;
+            auto cascadeTrades = CheckAndTriggerStopOrders(lastPrice);
+            allTrades.insert(allTrades.end(), cascadeTrades.begin(), cascadeTrades.end());
+        }
     }
+
+    return allTrades;
 }
 
 void Orderbook::MatchAtPriceLevel(OrderPointer& aggressive, OrderPointers& restingOrders, 

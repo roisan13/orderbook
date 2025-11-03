@@ -7,7 +7,7 @@ using Price = std::int32_t;
 using Quantity = std::uint32_t;
 using OrderID = std::uint64_t;
 
-// a small mix of concepts, 
+// Order execution types with different matching behaviours
 enum class OrderType {
     Market,
     PostOnly,
