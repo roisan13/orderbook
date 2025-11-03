@@ -148,7 +148,7 @@ orderbook/
 
 ## 🛠️ Requirements
 
-- **Compiler**: GCC 10+, Clang 11+, or MSVC 2019+
+- **Compiler**: GCC 13+, Clang 11+, or MSVC 2019+
 - **CMake**: 3.20 or later
 - **C++ Standard**: C++20
 
